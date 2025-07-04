@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Подача анкеты</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@400;700&family=VT323&family=Fira+Code:wght@400;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/dist/confetti.browser.min.js"></script>
+
+    <style>
+        body {
+            font-family: 'Unbounded', sans-serif;
+            background: linear-gradient(135deg, rgb(0, 0, 0), rgb(61, 0, 0), rgb(149, 1, 1));
+            color: #e0e0e0;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            overflow-x: hidden;
+        }
+
+        ::-webkit-scrollbar {
+            width: 10px;
+        }
+        ::-webkit-scrollbar-track {
+            background: rgb(30, 0, 0);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgb(100, 0, 0);
+            border-radius: 5px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgb(180, 0, 0);
+        }
+
+        #preloader {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, rgb(0, 0, 0), rgb(61, 0, 0), rgb(149, 1, 1));
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            transition: opacity 0.5s ease-out;
+            gap: 20px;
+        }
+
+        .preloader-text {
+            font-family: 'Unbounded', sans-serif;
+            font-size: 1.5rem;
+            color: #e0e0e0;
+            white-space: nowrap;
+            overflow: hidden;
+            border-right: 2px solid rgb(255, 0, 0);
+            animation: blink-caret 0.75s step-end infinite;
+            position: relative;
+            padding-right: 5px;
+        }
+
+        .preloader-text::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 0, 0, 0.3), transparent);
+            animation: scan-line 2s infinite linear;
+        }
+
+        @keyframes scan-line {
+            0% { left: -100%; }
+            100% { left: 100%; }
+        }
+
+        @keyframes blink-caret {
+            from, to { border-color: transparent }
+            50% { border-color: rgb(255, 0, 0); }
+        }
+
+        .hidden-preloader {
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+        }
+
+        .section-header h2 {
+            position: relative;
+            padding-bottom: 8px;
+            font-family: 'Unbounded', sans-serif;
+        }
+
+        .section-header h2::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            bottom: 0;
+            width: 100%;
+            height: 3px;
+            background-color: rgb(149, 1, 1);
+            border-radius: 2px;
+        }
+
+        .skill-button {
+            font-family: 'Unbounded', sans-serif;
+            transition: all 0.3s ease-in-out;
+            position: relative;
+            overflow: hidden;
+        }
+        .skill-button.active {
+            background-color: rgb(61, 0, 0) !important;
+            color: #ffffff !important;
+            transform: scale(1.05);
+            box-shadow: 0 0 15px rgba(61, 0, 0, 0.8);
+            z-index: 1;
+        }
+        .skill-button:hover:not(.active) {
+            transform: translateY(-5px) scale(1.05) rotateZ(2deg);
+            background-color: #4a4a4a;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.6), 0 0 12px rgba(149, 1, 1, 0.6);
+            text-shadow: 0 0 8px rgba(255, 0, 0, 0.5);
+            z-index: 2;
+        }
+        .skill-button::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            opacity: 0;
+            transition: width 0.4s ease-out, height 0.4s ease-out, opacity 0.4s ease-out;
+            z-index: -1;
+        }
+        .skill-button:hover::before {
+            width: 150%;
+            height: 150%;
+            opacity: 1;
+        }
+
+
+        input[type="text"],
+        input[type="number"],
+        input[type="url"],
+        textarea {
+            font-family: 'Unbounded', sans-serif;
+            transition: border-color 0.3s ease, box-shadow 0.3s ease, height 0.2s ease-out, padding 0.2s ease-out;
+            border: none;
+            background-color: rgb(61, 0, 0);
+            color: rgb(255, 255, 255);
+            min-height: 48px;
+            overflow: hidden;
+            resize: none;
+        }
+
+        textarea {
+            min-height: 100px;
+        }
+
+        .input-glow-focus:focus {
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(149, 1, 1, 0.5), inset 0 0 0 1px rgb(149, 1, 1);
+            border-color: transparent;
+            padding-top: 15px;
+            padding-bottom: 15px;
+        }
+
+        .icon-pulse {
+            animation: pulse 2s infinite cubic-bezier(0.4, 0, 0.6, 1);
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.08); opacity: 0.9; }
+        }
+
+        .form-main-shadow {
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5), 0 10px 10px -5px rgba(0, 0, 0, 0.2);
+        }
+        .form-section-shadow {
+            box-shadow: 0 8px 15px -3px rgba(0, 0, 0, 0.4), 0 4px 6px -2px rgba(0, 0, 0, 0.15);
+        }
+
+        .fixed-header-block {
+            font-family: 'Unbounded', sans-serif;
+            background-color: rgba(0, 0, 0, 0.6);
+            border: none;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+            z-index: 20;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            transition: all 0.3s ease-in-out;
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
+            color: rgba(255, 0, 0, 0.45);
+            font-size: 1.6875rem;
+        }
+
+        .fixed-header-block:hover {
+            transform: translateX(-50%) scale(1.02);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.6);
+        }
+
+        .input-group {
+            position: relative;
+            margin-bottom: 1.5rem;
+        }
+        .floating-label {
+            position: absolute;
+            top: 12px;
+            left: 16px;
+            color: #718096;
+            font-size: 1rem;
+            transition: all 0.2s ease-out;
+            pointer-events: none;
+            font-family: 'Unbounded', sans-serif;
+            background-color: rgb(61, 0, 0);
+            padding: 0 4px;
+            border-radius: 4px;
+            transform-origin: left top;
+        }
+        .input-group input:focus + .floating-label,
+        .input-group input:not(:placeholder-shown) + .floating-label,
+        .input-group textarea:focus + .floating-label,
+        .input-group textarea:not(:placeholder-shown) + .floating-label {
+            top: -10px;
+            font-size: 0.75rem;
+            color: rgb(149, 1, 1);
+            transform: scale(0.9);
+            background-color: rgb(0, 0, 0);
+        }
+
+        .fade-in-section {
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+        }
+
+        .fade-in-section.is-visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        #particle-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        #background-dynamic-text {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-family: 'Unbounded', sans-serif;
+            font-size: 8rem;
+            font-weight: 700;
+            color: rgba(149, 1, 1, 0.08);
+            text-align: center;
+            white-space: nowrap;
+            z-index: -2;
+            pointer-events: none;
+            transition: opacity 0.5s ease-in-out, transform 0.5s ease-in-out;
+            user-select: none;
+            text-shadow: 0 0 10px rgba(255, 0, 0, 0.05);
+        }
+
+        .submit-button {
+            font-family: 'Unbounded', sans-serif;
+            position: relative;
+            overflow: hidden;
+            background-image: linear-gradient(45deg, rgb(61, 0, 0) 0%, rgb(149, 1, 1) 100%);
+            box-shadow: 0 5px 15px rgba(61, 0, 0, 0.4);
+            transition: all 0.3s ease-in-out;
+            color: #ffffff;
+            border: none;
+        }
+
+        .submit-button:hover {
+            transform: scale(1.08) translateY(-3px);
+            box-shadow: 0 8px 25px rgba(61, 0, 0, 0.6), 0 0 20px rgba(149, 1, 1, 0.6);
+            background-image: linear-gradient(45deg, rgb(149, 1, 1) 0%, rgb(255, 0, 0) 100%);
+            text-shadow: 0 0 10px rgba(255, 0, 0, 0.6);
+        }
+
+        .submit-button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: all 0.7s ease;
+        }
+
+        .submit-button:hover::before {
+            left: 100%;
+        }
+
+        .form-outer-container {
+            background-color: rgba(0, 0, 0, 0.8);
+            border: none;
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+        }
+
+        .form-inner-section {
+            background-color: rgba(0, 0, 0, 0.6);
+            border: none;
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
+            transition: transform 0.3s ease, box-shadow 0.3s ease, background-color 0.3s ease;
+        }
+
+        .form-inner-section:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.5), 0 0 15px rgba(149, 1, 1, 0.8);
+            background-color: rgba(61, 0, 0, 0.3);
+        }
+        .text-gray-400,
+        .text-gray-300,
+        .input-group label {
+            font-family: 'Unbounded', sans-serif;
+        }
+
+        #otherLanguageInputGroup {
+            display: none;
+        }
+
+        .error-message {
+            background-color: rgba(255, 0, 0, 0.2);
+            color: rgb(255, 0, 0);
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-family: 'Unbounded', sans-serif;
+            font-size: 0.95rem;
+            animation: fadeOut 5s forwards;
+        }
+
+        @keyframes fadeOut {
+            0% { opacity: 1; }
+            80% { opacity: 1; }
+            100% { opacity: 0; display: none; }
+        }
+    </style>
+</head>
+<body class="font-sans antialiased">
+<div id="preloader">
+    <div class="preloader-text"></div>
+</div>
+
+<canvas id="particle-canvas"></canvas>
+
+<div id="background-dynamic-text"></div>
+
+<div class="fixed fixed-header-block py-2 px-6 rounded-full font-semibold">
+    AmbaDollars
+</div>
+
+<div class="container mx-auto p-4 max-w-2xl w-full relative pt-24">
+    <div class="text-center mb-8">
+        <p class="text-gray-400 text-lg">Заполни анкету и присоединяйся к нашей команде разработчиков</p>
+    </div>
+
+    <div class="form-outer-container p-8 rounded-2xl form-main-shadow">
+        <form id="application-form" autocomplete="off">
+            <div class="mb-8 p-6 form-inner-section rounded-xl form-section-shadow fade-in-section" data-bg-text="Начнем знакомство...">
+                <div class="section-header flex items-center mb-6">
+                    <i class="fas fa-user text-[rgb(149,1,1)] text-2xl mr-3 icon-pulse"></i>
+                    <h2 class="text-2xl font-semibold text-white">Основная информация</h2>
+                </div>
+                <div class="input-group">
+                    <input type="text" id="fullName" name="fullName" placeholder=" "
+                           class="input-glow-focus shadow appearance-none rounded w-full py-3 px-4 text-gray-100 leading-tight focus:outline-none transition-colors duration-200" required>
+                    <label for="fullName" class="floating-label">Полное имя</label>
+                </div>
+                <div class="input-group">
+                    <input type="number" id="age" name="age" placeholder=" " min="16" max="99"
+                           class="input-glow-focus shadow appearance-none rounded w-full py-3 px-4 text-gray-100 leading-tight focus:outline-none transition-colors duration-200" required>
+                    <label for="age" class="floating-label">Возраст</label>
+                </div>
+                <div class="input-group">
+                    <input type="text" id="contacts" name="contacts" placeholder=" "
+                           class="input-glow-focus shadow appearance-none rounded w-full py-3 px-4 text-gray-100 leading-tight focus:outline-none transition-colors duration-200">
+                    <label for="contacts" class="floating-label">Контакты (Telegram)</label>
+                </div>
+            </div>
+
+            <div class="mb-8 p-6 form-inner-section rounded-xl form-section-shadow fade-in-section" data-bg-text="Покажи свои скиллы...">
+                <div class="section-header flex items-center mb-6">
+                    <i class="fas fa-code text-[rgb(149,1,1)] text-2xl mr-3 icon-pulse"></i>
+                    <h2 class="text-2xl font-semibold text-white">Навыки</h2>
+                </div>
+                <div class="mb-4">
+                    <label class="block text-gray-300 text-sm font-bold mb-2">Основные языки программирования (выберите минимум 1)</label>
+                    <div id="skill-buttons" class="flex flex-wrap gap-3 mt-2">
+                        <button type="button" class="skill-button bg-gray-700 hover:bg-gray-600 text-gray-200 font-semibold py-2 px-4 rounded-full transition-colors duration-200" data-skill="JavaScript">JavaScript</button>
+                        <button type="button" class="skill-button bg-gray-700 hover:bg-gray-600 text-gray-200 font-semibold py-2 px-4 rounded-full transition-colors duration-200" data-skill="Python">Python</button>
+                        <button type="button" class="skill-button bg-gray-700 hover:bg-gray-600 text-gray-200 font-semibold py-2 px-4 rounded-full transition-colors duration-200" data-skill="Java">Java</button>
+                        <button type="button" class="skill-button bg-gray-700 hover:bg-gray-600 text-gray-200 font-semibold py-2 px-4 rounded-full transition-colors duration-200" data-skill="C++">C++</button>
+                        <button type="button" class="skill-button bg-gray-700 hover:bg-gray-600 text-gray-200 font-semibold py-2 px-4 rounded-full transition-colors duration-200" data-skill="PHP">PHP</button>
+                        <button type="button" class="skill-button bg-gray-700 hover:bg-gray-600 text-gray-200 font-semibold py-2 px-4 rounded-full transition-colors duration-200" data-skill="Ruby">Ruby</button>
+                        <button type="button" class="skill-button bg-gray-700 hover:bg-gray-600 text-gray-200 font-semibold py-2 px-4 rounded-full transition-colors duration-200" data-skill="Go">Go</button>
+                        <button type="button" class="skill-button bg-gray-700 hover:bg-gray-600 text-gray-200 font-semibold py-2 px-4 rounded-full transition-colors duration-200" data-skill="Другой">Другой</button>
+                    </div>
+                    <div id="otherLanguageInputGroup" class="input-group mt-4">
+                        <input type="text" id="otherLanguage" name="otherLanguage" placeholder=" "
+                               class="input-glow-focus shadow appearance-none rounded w-full py-3 px-4 text-gray-100 leading-tight focus:outline-none transition-colors duration-200">
+                        <label for="otherLanguage" class="floating-label">Напишите другой язык</label>
+                    </div>
+                    <input type="hidden" id="selectedSkills" name="selectedSkills" required>
+                </div>
+                <div class="input-group">
+                    <input type="number" id="experience" name="experience" placeholder=" "
+                           class="input-glow-focus shadow appearance-none rounded w-full py-3 px-4 text-gray-100 leading-tight focus:outline-none transition-colors duration-200" required>
+                    <label for="experience" class="floating-label">Опыт работы (лет)</label>
+                </div>
+                <div class="input-group">
+                    <input type="url" id="portfolio" name="portfolio" placeholder=" "
+                           class="input-glow-focus shadow appearance-none rounded w-full py-3 px-4 text-gray-100 leading-tight focus:outline-none transition-colors duration-200">
+                    <label for="portfolio" class="floating-label">Портфолио или GitHub</label>
+                </div>
+            </div>
+
+            <div class="mb-8 p-6 form-inner-section rounded-xl form-section-shadow fade-in-section" data-bg-text="Расскажи о себе...">
+                <div class="section-header flex items-center mb-6">
+                    <i class="fas fa-clipboard-list text-[rgb(149,1,1)] text-2xl mr-3 icon-pulse"></i>
+                    <h2 class="text-2xl font-semibold text-white">Дополнительно</h2>
+                </div>
+                <div class="input-group">
+                        <textarea id="about" name="about" placeholder=" "
+                                  class="input-glow-focus shadow appearance-none rounded w-full py-3 px-4 text-gray-100 leading-tight focus:outline-none transition-colors duration-200"></textarea>
+                    <label for="about" class="floating-label">Расскажите о себе</label>
+                </div>
+                <div class="input-group">
+                        <textarea id="expectations" name="expectations" placeholder=" "
+                                  class="input-glow-focus shadow appearance-none rounded w-full py-3 px-4 text-gray-100 leading-tight focus:outline-none transition-colors duration-200"></textarea>
+                    <label for="expectations" class="floating-label">Что вы ожидаете от команды?</label>
+                </div>
+            </div>
+
+            <div class="text-center" data-bg-text="Присоединяйся к команде!">
+                <button type="submit" id="submitBtn"
+                        class="submit-button font-bold py-3 px-8 rounded-full shadow-lg flex items-center justify-center mx-auto">
+                    <i class="fas fa-paper-plane mr-2"></i> Отправить анкету
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <footer class="text-center text-sm mt-8" style="color: rgb(255, 0, 0);">
+        <p>&copy; 2025 Coders Ankets | Все права защищены</p>
+    </footer>
+</div>
+
+<script src="script.js" defer></script>
+</body>
+</html>

@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>.drnx - Анкета успешно отправлена!</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@400;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/dist/confetti.browser.min.js"></script>
+
+    <style>
+        body {
+            font-family: 'Unbounded', sans-serif;
+            background: linear-gradient(135deg, rgb(0, 0, 0), rgb(61, 0, 0), rgb(149, 1, 1));
+            color: #e0e0e0;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            overflow: hidden;
+        }
+
+        #successMessageContainer {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            height: 100vh;
+            text-align: center;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        #successMessageContainer h2 {
+            font-size: 2.5rem;
+            color: #4CAF50;
+            margin-bottom: 20px;
+            animation: fadeInScale 1s ease-out forwards;
+        }
+
+        #successMessageContainer p {
+            font-size: 1.2rem;
+            color: #e0e0e0;
+            margin-bottom: 30px;
+            animation: fadeInScale 1.2s ease-out forwards;
+            animation-delay: 0.2s;
+        }
+
+        #backToFormBtn {
+            background-color: rgb(0, 0, 0);
+            color: white;
+            padding: 12px 30px;
+            border-radius: 8px;
+            font-weight: bold;
+            transition: background-color 0.3s ease, transform 0.3s ease;
+            animation: fadeInScale 1.4s ease-out forwards;
+            animation-delay: 0.4s;
+        }
+
+        #backToFormBtn:hover {
+            background-color: rgb(30, 0, 0);
+            transform: translateY(-2px);
+        }
+
+        .animate-bounce {
+            animation: bounce 1s infinite;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        @keyframes fadeInScale {
+            from { opacity: 0; transform: scale(0.9); }
+            to { opacity: 1; transform: scale(1); }
+        }
+    </style>
+</head>
+<body>
+<div id="successMessageContainer">
+    <i class="fas fa-check-circle text-green-500 text-6xl mb-4 animate-bounce"></i>
+    <h2>Анкета успешно отправлена!</h2>
+    <p>Спасибо за вашу заявку. Мы свяжемся с вами в ближайшее время!</p>
+    <button id="backToFormBtn" class="py-3 px-6 rounded-lg font-semibold">
+        Отправить новую анкету
+    </button>
+</div>
+
+<script>
+    window.addEventListener('load', function() {
+        if (typeof confetti === 'function') {
+            confetti({
+                particleCount: 150,
+                spread: 90,
+                origin: { x: 0, y: 0.6 },
+                colors: ['#6C63FF', '#8B85FF', '#FF6584', '#FF0000', '#FFA500', '#FFFF00']
+            });
+            confetti({
+                particleCount: 150,
+                spread: 90,
+                origin: { x: 1, y: 0.6 },
+                colors: ['#6C63FF', '#8B85FF', '#FF6584', '#FF0000', '#FFA500', '#FFFF00']
+            });
+            confetti({
+                particleCount: 120,
+                spread: 120,
+                origin: { x: 0.5, y: 0.2 },
+                colors: ['#6C63FF', '#8B85FF', '#FF6584', '#FF0000', '#FFA500', '#FFFF00']
+            });
+        }
+
+        const backToFormBtn = document.getElementById('backToFormBtn');
+        if (backToFormBtn) {
+            backToFormBtn.addEventListener('click', function() {
+                window.location.href = 'index.html';
+            });
+        }
+    });
+</script>
+</body>
+</html>
